@@ -11,7 +11,7 @@ using DevExpress.Persistent.Base;
 using DevExpress.Persistent.BaseImpl.EF.PermissionPolicy;
 using DevExpress.XtraEditors;
 using Microsoft.EntityFrameworkCore;
-using System.Configuration;
+using Microsoft.Extensions.Configuration;
 using System.Reflection;
 
 namespace XafNavigatonHub.Win
@@ -57,14 +57,16 @@ namespace XafNavigatonHub.Win
             }
             Tracing.Initialize();
 
-            string connectionString = null;
-            if (ConfigurationManager.ConnectionStrings["ConnectionString"] != null)
-            {
-                connectionString = ConfigurationManager.ConnectionStrings["ConnectionString"].ConnectionString;
-            }
+            var configuration = new ConfigurationBuilder()
+                .SetBasePath(AppDomain.CurrentDomain.BaseDirectory)
+                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
+                .AddJsonFile($"appsettings.{Environment.GetEnvironmentVariable("DOTNET_ENVIRONMENT") ?? "Production"}.json", optional: true, reloadOnChange: true)
+                .Build();
+
+            string connectionString = configuration.GetConnectionString("ConnectionString");
 #if EASYTEST
-            if(ConfigurationManager.ConnectionStrings["EasyTestConnectionString"] != null) {
-                connectionString = ConfigurationManager.ConnectionStrings["EasyTestConnectionString"].ConnectionString;
+            if(configuration.GetConnectionString("EasyTestConnectionString") != null) {
+                connectionString = configuration.GetConnectionString("EasyTestConnectionString");
             }
 #endif
             ArgumentNullException.ThrowIfNull(connectionString);

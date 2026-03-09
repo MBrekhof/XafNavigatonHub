@@ -22,6 +22,12 @@
     <Content Include="Model.xafml">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </Content>
+    <Content Include="appsettings.json">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </Content>
+    <Content Include="appsettings.Development.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
   <ItemGroup>
     <EmbeddedResource Include="Images\Logo.svg" />
@@ -46,7 +52,8 @@
     <PackageReference Include="DevExpress.Persistent.BaseImpl.EFCore" Version="25.2.3" />
     <PackageReference Include="DevExpress.RichEdit.Export" Version="25.2.3" />
     <PackageReference Include="DevExpress.Win.Design" Version="25.2.3" />
-    
+    <PackageReference Include="Microsoft.Extensions.Configuration" Version="8.0.0" />
+    <PackageReference Include="Microsoft.Extensions.Configuration.Json" Version="8.0.1" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\XafNavigatonHub.Module\XafNavigatonHub.Module.csproj" />
