@@ -14,15 +14,16 @@
     </Items>
   </NavigationItems>
   <Views>
-    <DashboardView Id="NavigationHub_DashboardView" IsNewNode="True">
+    <DashboardView Id="NavigationHub_DashboardView" Caption="Main" IsNewNode="True">
       <Items>
-        <ControlDetailItem Id="NavigationHubControl"
+        <ControlDetailItem Id="NavigationHubControl" Caption=" "
           ControlTypeName="XafNavigatonHub.Blazor.Server.Editors.NavigationHubComponent"
           IsNewNode="True" />
       </Items>
       <Layout>
         <LayoutGroup Id="Main" ShowCaption="False" IsNewNode="True">
-          <LayoutItem Id="NavigationHubControl" ViewItem="NavigationHubControl" IsNewNode="True" />
+          <LayoutItem Id="NavigationHubControl" ViewItem="NavigationHubControl"
+            ShowCaption="False" IsNewNode="True" />
         </LayoutGroup>
       </Layout>
     </DashboardView>

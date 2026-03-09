@@ -93,10 +93,19 @@ public class NavigationHubControl : DevExpress.XtraEditors.XtraUserControl
 
         var skin = CommonSkins.GetSkin(UserLookAndFeel.Default);
         var bgColor = GetSkinBackColor(skin);
-        var cardBgColor = GetSkinCardColor(skin);
-        var textColor = GetSkinTextColor(skin);
-        var headerColor = GetSkinHeaderColor(skin);
-        var borderColor = GetSkinBorderColor(skin);
+        // If skin returned black/transparent, derive from parent form
+        if (bgColor == Color.Black || bgColor.A == 0)
+        {
+            var form = FindForm();
+            if (form != null && form.BackColor != Color.Black && form.BackColor.A > 0)
+                bgColor = form.BackColor;
+            else
+                bgColor = SystemColors.Control;
+        }
+        var cardBgColor = GetSkinCardColor(skin, bgColor);
+        var textColor = GetSkinTextColor(skin, bgColor);
+        var headerColor = Color.FromArgb(180, textColor);
+        var borderColor = GetSkinBorderColor(bgColor);
 
         _scrollPanel.BackColor = bgColor;
 
@@ -407,15 +416,28 @@ public class NavigationHubControl : DevExpress.XtraEditors.XtraUserControl
     {
         try
         {
-            var element = skin[CommonSkins.SkinForm];
-            if (element != null)
-                return element.Color.BackColor;
+            // Try multiple skin elements for background color
+            foreach (var key in new[] { CommonSkins.SkinForm, CommonSkins.SkinTextBorder, "Form" })
+            {
+                var element = skin[key];
+                if (element?.Color.BackColor is { } c && c != Color.Empty && c.A > 0 && c != Color.Black)
+                    return c;
+            }
+            // Fallback: use the LookAndFeel's actual control back color
+            var laf = UserLookAndFeel.Default;
+            var painter = CommonSkins.GetSkin(laf);
+            if (painter != null)
+            {
+                var formSkin = painter[CommonSkins.SkinForm];
+                if (formSkin?.Color.BackColor2 is { } c2 && c2 != Color.Empty && c2.A > 0 && c2 != Color.Black)
+                    return c2;
+            }
         }
         catch { }
         return SystemColors.Control;
     }
 
-    private static Color GetSkinCardColor(Skin skin)
+    private static Color GetSkinCardColor(Skin skin, Color bgColor)
     {
         try
         {
@@ -423,18 +445,16 @@ public class NavigationHubControl : DevExpress.XtraEditors.XtraUserControl
             if (element != null)
             {
                 var c = element.Color.BackColor;
-                if (c != Color.Empty && c.A > 0) return c;
+                if (c != Color.Empty && c.A > 0 && c != Color.Black) return c;
             }
         }
         catch { }
-        // Derive from form color: if dark theme, use slightly lighter; if light, use white
-        var bg = GetSkinBackColor(skin);
-        return bg.GetBrightness() < 0.5f
-            ? Color.FromArgb(255, Math.Min(bg.R + 25, 255), Math.Min(bg.G + 25, 255), Math.Min(bg.B + 25, 255))
+        return bgColor.GetBrightness() < 0.5f
+            ? Color.FromArgb(255, Math.Min(bgColor.R + 25, 255), Math.Min(bgColor.G + 25, 255), Math.Min(bgColor.B + 25, 255))
             : Color.White;
     }
 
-    private static Color GetSkinTextColor(Skin skin)
+    private static Color GetSkinTextColor(Skin skin, Color bgColor)
     {
         try
         {
@@ -446,20 +466,12 @@ public class NavigationHubControl : DevExpress.XtraEditors.XtraUserControl
             }
         }
         catch { }
-        var bg = GetSkinBackColor(skin);
-        return bg.GetBrightness() < 0.5f ? Color.FromArgb(230, 230, 230) : Color.FromArgb(50, 50, 50);
+        return bgColor.GetBrightness() < 0.5f ? Color.FromArgb(230, 230, 230) : Color.FromArgb(50, 50, 50);
     }
 
-    private static Color GetSkinHeaderColor(Skin skin)
+    private static Color GetSkinBorderColor(Color bgColor)
     {
-        var text = GetSkinTextColor(skin);
-        return Color.FromArgb(180, text);
-    }
-
-    private static Color GetSkinBorderColor(Skin skin)
-    {
-        var bg = GetSkinBackColor(skin);
-        return bg.GetBrightness() < 0.5f
+        return bgColor.GetBrightness() < 0.5f
             ? Color.FromArgb(60, 255, 255, 255)
             : Color.FromArgb(224, 224, 224);
     }

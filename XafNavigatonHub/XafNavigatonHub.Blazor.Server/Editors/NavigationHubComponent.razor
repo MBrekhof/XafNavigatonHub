@@ -20,7 +20,7 @@
          @ondrop="OnPinnedDrop"
          @ondrop:preventDefault="true"
          @ondragleave="OnPinnedDragLeave">
-        <h5 style="color: #666; margin-bottom: 16px; font-weight: 600; padding: 0 8px;">
+        <h5 class="hub-section-header">
             &#9733; Preferred Actions
             @if (draggedButton != null && !pinnedButtons.Contains(draggedButton))
             {
@@ -68,7 +68,7 @@
             }
             @if (!pinnedButtons.Any() && draggedButton == null)
             {
-                <div style="color: #aaa; font-size: 13px; padding: 8px 0;">
+                <div class="hub-empty-hint">
                     Right-click or drag cards here to pin them
                 </div>
             }
@@ -90,7 +90,7 @@
     @foreach (var category in categories)
     {
         <div class="hub-section" style="margin-bottom: 32px;">
-            <h5 style="color: #666; margin-bottom: 16px; font-weight: 600;">
+            <h5 class="hub-section-header">
                 @category.Caption
             </h5>
             <div style="display: flex; flex-wrap: wrap; gap: 16px;">
@@ -130,6 +130,16 @@
 </div>
 
 <style>
+    .hub-section-header {
+        color: var(--dxbl-text-secondary, #666);
+        margin-bottom: 16px;
+        font-weight: 600;
+    }
+    .hub-empty-hint {
+        color: var(--dxbl-text-secondary, #aaa);
+        font-size: 13px;
+        padding: 8px 0;
+    }
     .hub-card {
         width: 160px;
         min-height: 120px;
@@ -144,6 +154,10 @@
         transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
         user-select: none;
         position: relative;
+        background: var(--dxbl-surface, var(--dxbl-card-bg, white));
+        border: 1px solid var(--dxbl-border-color, #e0e0e0);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        color: var(--dxbl-text, inherit);
     }
     .hub-card:hover {
         transform: translateY(-2px);
@@ -160,6 +174,7 @@
         font-size: 14px;
         font-weight: 500;
         text-align: center;
+        color: var(--dxbl-text, inherit);
     }
 
     .pinned-drop-zone {
@@ -450,6 +465,6 @@
     private string GetCardStyle(string color)
     {
         var c = string.IsNullOrEmpty(color) ? "#1976D2" : color;
-        return $"background: white; border: 1px solid #e0e0e0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid {c};";
+        return $"border-left: 4px solid {c};";
     }
 }
