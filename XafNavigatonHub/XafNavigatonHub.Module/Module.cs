@@ -10,6 +10,7 @@ using DevExpress.ExpressApp.ReportsV2;
 using DevExpress.ExpressApp.Updating;
 using DevExpress.Persistent.Base;
 using System.ComponentModel;
+using XafNavigatonHub.Module.Model;
 
 namespace XafNavigatonHub.Module
 {
@@ -53,6 +54,11 @@ namespace XafNavigatonHub.Module
         {
             base.Setup(application);
             // Manage various aspects of the application UI and behavior at the module level.
+        }
+        public override void ExtendModelInterfaces(ModelInterfaceExtenders extenders)
+        {
+            base.ExtendModelInterfaces(extenders);
+            extenders.Add<IModelApplication, IModelNavigationHubExtension>();
         }
         public override void Setup(ApplicationModulesManager moduleManager)
         {
