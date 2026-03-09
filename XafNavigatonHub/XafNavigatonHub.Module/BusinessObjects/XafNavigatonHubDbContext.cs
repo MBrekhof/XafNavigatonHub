@@ -26,6 +26,13 @@ namespace XafNavigatonHub.Module.BusinessObjects
         public DbSet<Event> Events { get; set; }
         public DbSet<HCategory> HCategories { get; set; }
         public DbSet<UserHubPreference> UserHubPreferences { get; set; }
+        public DbSet<Employee> Employees { get; set; }
+        public DbSet<Department> Departments { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<Customer> Customers { get; set; }
+        public DbSet<SalesOrder> SalesOrders { get; set; }
+        public DbSet<ProjectTask> ProjectTasks { get; set; }
+        public DbSet<AuditLogEntry> AuditLogEntries { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

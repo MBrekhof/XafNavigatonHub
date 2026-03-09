@@ -7,7 +7,26 @@
     <LayoutManagerOptions RequiredFieldMark="*" />
   </Options>
   <NavigationHub>
-    <Item Id="Administration" Caption="Administration" SortOrder="0" IsNewNode="True">
+    <Item Id="HR" Caption="Human Resources" SortOrder="0" IsNewNode="True">
+      <Buttons>
+        <Item Id="Employees" Caption="Employees" ImageName="BO_Employee" NavigationItemId="Employee_ListView" Color="#4CAF50" SortOrder="0" IsNewNode="True" />
+        <Item Id="Departments" Caption="Departments" ImageName="BO_Department" NavigationItemId="Department_ListView" Color="#4CAF50" SortOrder="1" IsNewNode="True" />
+      </Buttons>
+    </Item>
+    <Item Id="Sales" Caption="Sales &amp; CRM" SortOrder="1" IsNewNode="True">
+      <Buttons>
+        <Item Id="Customers" Caption="Customers" ImageName="BO_Customer" NavigationItemId="Customer_ListView" Color="#FF9800" SortOrder="0" IsNewNode="True" />
+        <Item Id="Orders" Caption="Orders" ImageName="BO_Order" NavigationItemId="SalesOrder_ListView" Color="#FF9800" SortOrder="1" IsNewNode="True" />
+        <Item Id="Products" Caption="Products" ImageName="BO_Product" NavigationItemId="Product_ListView" Color="#FF9800" SortOrder="2" IsNewNode="True" />
+      </Buttons>
+    </Item>
+    <Item Id="ProjectManagement" Caption="Project Management" SortOrder="2" IsNewNode="True">
+      <Buttons>
+        <Item Id="Tasks" Caption="Tasks" ImageName="BO_Task" NavigationItemId="ProjectTask_ListView" Color="#9C27B0" SortOrder="0" IsNewNode="True" />
+        <Item Id="AuditLog" Caption="Audit Log" ImageName="BO_Audit_ChangeHistory" NavigationItemId="AuditLogEntry_ListView" Color="#9C27B0" SortOrder="1" IsNewNode="True" />
+      </Buttons>
+    </Item>
+    <Item Id="Administration" Caption="Administration" SortOrder="3" IsNewNode="True">
       <Buttons>
         <Item Id="Users" Caption="Users" ImageName="BO_User" NavigationItemId="ApplicationUser_ListView" Color="#1976D2" SortOrder="0" IsNewNode="True" />
         <Item Id="Roles" Caption="Roles" ImageName="BO_Role" NavigationItemId="PermissionPolicyRole_ListView" Color="#1976D2" SortOrder="1" IsNewNode="True" />
