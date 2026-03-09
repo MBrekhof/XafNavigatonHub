@@ -6,6 +6,14 @@
   <Options>
     <LayoutManagerOptions RequiredFieldMark="*" />
   </Options>
+  <NavigationHub>
+    <Item Id="Administration" Caption="Administration" SortOrder="0" IsNewNode="True">
+      <Buttons>
+        <Item Id="Users" Caption="Users" ImageName="BO_User" NavigationItemId="ApplicationUser_ListView" Color="#1976D2" SortOrder="0" IsNewNode="True" />
+        <Item Id="Roles" Caption="Roles" ImageName="BO_Role" NavigationItemId="PermissionPolicyRole_ListView" Color="#1976D2" SortOrder="1" IsNewNode="True" />
+      </Buttons>
+    </Item>
+  </NavigationHub>
   <Views>
     <ListView Id="ApplicationUser_ListView" Caption="Users" />
     <DetailView Id="ReportDataV2_DetailView">
