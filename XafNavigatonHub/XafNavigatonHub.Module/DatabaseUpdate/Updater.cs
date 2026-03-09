@@ -317,7 +317,7 @@ namespace XafNavigatonHub.Module.DatabaseUpdate
                 defaultRole.AddTypePermissionsRecursively<ModelDifference>(SecurityOperations.Create, SecurityPermissionState.Allow);
                 defaultRole.AddTypePermissionsRecursively<ModelDifferenceAspect>(SecurityOperations.Create, SecurityPermissionState.Allow);
                 defaultRole.AddObjectPermissionFromLambda<UserHubPreference>(
-                    SecurityOperations.ReadWriteAccess,
+                    SecurityOperations.ReadWriteAccess + ";" + SecurityOperations.Delete,
                     p => p.UserId == (Guid)CurrentUserIdOperator.CurrentUserId(),
                     SecurityPermissionState.Allow);
                 defaultRole.AddTypePermissionsRecursively<UserHubPreference>(

@@ -24,6 +24,11 @@ All Phase 1 features are complete and working on both Blazor and WinForms.
 - WinForms skin colors: `CommonSkins.GetSkin()` → `SvgPalettes[DefaultSkinPaletteName]` → named colors ("Paint", "Paint High", etc.)
 - `DXSkinColors.FillColors` only has semantic colors (Primary, Success, Warning, Danger, Question) — NOT suitable for general background/text colors
 
+### Latest Changes
+
+- Fixed `UserHubPreference` security: object permission now grants `ReadWriteAccess;Delete` (was missing Delete, causing "prohibited by security rules" on unpin)
+- Added visual "x" unpin button on hover for pinned cards on both Blazor and WinForms
+
 ## Next Steps
 
 - **Phase 2**: Runtime admin UI for hub configuration (business objects instead of Model Editor)

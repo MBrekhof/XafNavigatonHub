@@ -8,6 +8,7 @@ Track all pending, in-progress, and completed tasks here.
 
 ## Completed
 
+- [x] Fix unpin security error + add "x" unpin button on pinned cards (both platforms)
 - [x] WinForms dark theme support (SVG palette colors)
 - [x] Blazor dark theme support (DX Design System CSS variables)
 - [x] Demo business objects, roles, users, and seed data

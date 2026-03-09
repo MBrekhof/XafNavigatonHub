@@ -5,7 +5,7 @@ A **Navigation Hub / Launchpad** for DevExpress XAF that replaces sidebar naviga
 ## Features
 
 - **Card-based navigation** — colorful tiles with icons, grouped by category
-- **Per-user pinned favorites** — right-click to pin/unpin cards to "Preferred Actions" row, persisted in database
+- **Per-user pinned favorites** — right-click to pin, click "x" or right-click to unpin from "Preferred Actions" row, persisted in database
 - **Drag & drop** (Blazor) — drag cards into favorites, reorder pinned items, drop to unpin
 - **Role-based visibility** — buttons automatically hidden based on XAF navigation permissions
 - **External URL buttons** — open external links in a new browser tab

@@ -81,7 +81,9 @@ public class NavigationHubControl : DevExpress.XtraEditors.XtraUserControl
     #region Painting
 
     private readonly Dictionary<(HubButtonData Button, bool IsPinned), Rectangle> _cardRects = new();
+    private readonly Dictionary<HubButtonData, Rectangle> _unpinRects = new();
     private (HubButtonData Button, bool IsPinned)? _hoveredCard;
+    private bool _isHoveringUnpin;
     private readonly Dictionary<string, Image> _imageCache = new();
 
     private void ScrollPanel_Paint(object sender, PaintEventArgs e)
@@ -90,6 +92,7 @@ public class NavigationHubControl : DevExpress.XtraEditors.XtraUserControl
         g.SmoothingMode = SmoothingMode.AntiAlias;
         g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
         _cardRects.Clear();
+        _unpinRects.Clear();
 
         GetSkinColors(out var bgColor, out var cardBgColor, out var textColor, out var borderColor);
         var headerColor = Color.FromArgb(180, textColor);
@@ -147,7 +150,7 @@ public class NavigationHubControl : DevExpress.XtraEditors.XtraUserControl
                              _hoveredCard.Value.Button == button &&
                              _hoveredCard.Value.IsPinned == isPinned;
 
-            PaintCard(g, button, rect, isHovered, cardBg, textColor, borderColor);
+            PaintCard(g, button, rect, isHovered, isPinned, cardBg, textColor, borderColor);
 
             col++;
             if (col >= cardsPerRow)
@@ -162,7 +165,7 @@ public class NavigationHubControl : DevExpress.XtraEditors.XtraUserControl
     }
 
     private void PaintCard(Graphics g, HubButtonData button, Rectangle rect,
-        bool isHovered, Color cardBg, Color textColor, Color borderColor)
+        bool isHovered, bool isPinned, Color cardBg, Color textColor, Color borderColor)
     {
         var accentColor = ParseColor(button.Color, Color.FromArgb(25, 118, 210));
 
@@ -225,6 +228,28 @@ public class NavigationHubControl : DevExpress.XtraEditors.XtraUserControl
             using var extFont = new Font("Segoe UI", 11f, FontStyle.Regular);
             using var extBrush = new SolidBrush(isHovered ? accentColor : Color.FromArgb(160, textColor));
             g.DrawString("\u2197", extFont, extBrush, rect.Right - 18, rect.Y + 4);
+        }
+
+        // Unpin "x" button on pinned cards (visible on hover)
+        if (isPinned && isHovered)
+        {
+            const int btnSize = 18;
+            var btnRect = new Rectangle(rect.X + 5, rect.Y + 5, btnSize, btnSize);
+            _unpinRects[button] = btnRect;
+
+            var btnBg = _isHoveringUnpin && _hoveredCard?.Button == button
+                ? Color.FromArgb(30, 211, 47, 47)
+                : Color.FromArgb(20, textColor);
+            var btnFg = _isHoveringUnpin && _hoveredCard?.Button == button
+                ? Color.FromArgb(211, 47, 47)
+                : Color.FromArgb(160, textColor);
+
+            using var circleBrush = new SolidBrush(btnBg);
+            g.FillEllipse(circleBrush, btnRect);
+            using var xFont = new Font("Segoe UI", 9f, FontStyle.Bold);
+            using var xBrush = new SolidBrush(btnFg);
+            using var xFormat = new StringFormat { Alignment = StringAlignment.Center, LineAlignment = StringAlignment.Center };
+            g.DrawString("\u00d7", xFont, xBrush, btnRect, xFormat);
         }
     }
 
@@ -321,9 +346,18 @@ public class NavigationHubControl : DevExpress.XtraEditors.XtraUserControl
             }
         }
 
-        if (newHover != _hoveredCard)
+        // Check if hovering over an unpin button
+        bool newHoveringUnpin = false;
+        if (newHover is { IsPinned: true })
+        {
+            if (_unpinRects.TryGetValue(newHover.Value.Button, out var unpinRect) && unpinRect.Contains(e.Location))
+                newHoveringUnpin = true;
+        }
+
+        if (newHover != _hoveredCard || newHoveringUnpin != _isHoveringUnpin)
         {
             _hoveredCard = newHover;
+            _isHoveringUnpin = newHoveringUnpin;
             _scrollPanel.Cursor = _hoveredCard.HasValue ? Cursors.Hand : Cursors.Default;
             _scrollPanel.Invalidate();
         }
@@ -350,6 +384,14 @@ public class NavigationHubControl : DevExpress.XtraEditors.XtraUserControl
 
                 if (e.Button == MouseButtons.Left)
                 {
+                    // Check if click is on the unpin "x" button
+                    if (isPinned && _unpinRects.TryGetValue(button, out var unpinRect) && unpinRect.Contains(e.Location))
+                    {
+                        _contextButton = button;
+                        UnpinContextButton();
+                        return;
+                    }
+
                     if (!string.IsNullOrEmpty(button.ExternalUrl))
                     {
                         Process.Start(new ProcessStartInfo(button.ExternalUrl) { UseShellExecute = true });
