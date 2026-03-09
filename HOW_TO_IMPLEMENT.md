@@ -56,6 +56,45 @@ Add seed data in `XafNavigatonHub.Module/DatabaseUpdate/Updater.cs` inside `Upda
 - Default roles (Admin, Default) are created in the `Updater`
 - To restrict access to a new business object, add type/object/member permissions to the relevant role
 
+## NavigationHub: Adding Buttons
+
+Hub buttons are configured via the XAF Application Model. Each button belongs to a category and links to an XAF navigation item.
+
+### Via Model Editor
+
+1. Open the Model Editor in Visual Studio
+2. Navigate to the **NavigationHub** node
+3. Add a category (e.g., "HR") with `Id`, `Caption`, and `SortOrder`
+4. Under the category's **Buttons** node, add buttons with:
+   - `Id` — unique identifier
+   - `Caption` — display label
+   - `ImageName` — XAF image name (e.g., `BO_Employee`)
+   - `NavigationItemId` — the `GetIdPath()` of the target navigation item (e.g., `Default/Employee_ListView`)
+   - `Color` — hex accent color (e.g., `#4CAF50`)
+   - `SortOrder` — ordering within category
+
+### Via Model.DesignedDiffs.xafml
+
+```xml
+<NavigationHub>
+  <Item Id="HR" Caption="HR" SortOrder="1" IsNewNode="True">
+    <Buttons>
+      <Item Id="Employees" Caption="Employees" ImageName="BO_Employee"
+        NavigationItemId="Employee_ListView" Color="#4CAF50" SortOrder="0"
+        IsNewNode="True" />
+    </Buttons>
+  </Item>
+</NavigationHub>
+```
+
+### Role-Based Visibility
+
+Buttons are automatically hidden if the current user doesn't have navigation permission for the linked view. No extra configuration needed — XAF's built-in `NavigationPermission` handles it.
+
+### User Pinned Favorites
+
+Users can right-click a card to pin/unpin it to the "Preferred Actions" row. Pins are stored per-user in the `UserHubPreference` table.
+
 ## Model Customization
 
 - Use the XAF Model Editor (Visual Studio designer) to customize views
