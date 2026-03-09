@@ -4,16 +4,18 @@ Track all pending, in-progress, and completed tasks here.
 
 ## Pending
 
-- [ ] WinForms Hub ViewItem (UserControl with painted cards)
-- [ ] WinForms Hub Tab Non-Closable (DocumentManager)
-- [ ] Drag & Drop pinning (HTML5 drag API on Blazor)
-- [ ] End-to-end testing of Blazor hub
+- [ ] End-to-end testing of Blazor hub (basic card visibility verified)
 - [ ] Phase 2: Runtime admin UI for hub config
-- [ ] External URL button support
 
 ## In Progress
 
 ## Completed
+
+- [x] WinForms Hub ViewItem (owner-draw UserControl with painted cards)
+- [x] WinForms Hub Tab Non-Closable (DocumentManager TabbedView)
+- [x] Drag & Drop pinning (HTML5 drag API on Blazor)
+- [x] External URL button support
+- [x] Fix hub card icons (ImageLoader instead of static paths)
 
 - [x] Enable TabbedMDI on both platforms
 - [x] Define Application Model extensions (IModelNavigationHub, IModelHubCategory, IModelHubButton)
