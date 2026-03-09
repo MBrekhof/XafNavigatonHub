@@ -17,7 +17,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project Overview
 
-XafNavigatonHub is a DevExpress XAF (eXpressApp Framework) application targeting .NET 8 with DevExpress v25.2.3. It uses EF Core with SQL Server (LocalDB) and includes both Blazor Server and WinForms frontends.
+XafNavigatonHub is a **Navigation Hub / Launchpad** — a DevExpress XAF application that replaces the default sidebar navigation with a full-page colorful button grid. Users land on a dashboard-style home screen with styled buttons that open different functional areas (request pages, modules, etc.). Built on .NET 8 with DevExpress v25.2.3, EF Core, SQL Server (LocalDB), with Blazor Server and WinForms frontends.
 
 ## Solution Structure
 

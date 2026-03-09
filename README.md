@@ -1,6 +1,6 @@
 # XafNavigatonHub
 
-A DevExpress XAF application with Blazor Server and WinForms frontends, built on .NET 8 with EF Core and SQL Server.
+A **Navigation Hub / Launchpad** built with DevExpress XAF. Replaces the default XAF sidebar navigation with a full-page colorful button grid — a dashboard-style home screen where users click styled buttons to open different functional areas (request pages, modules, etc.). Built on .NET 8 with EF Core and SQL Server, with Blazor Server and WinForms frontends.
 
 ## Prerequisites
 
