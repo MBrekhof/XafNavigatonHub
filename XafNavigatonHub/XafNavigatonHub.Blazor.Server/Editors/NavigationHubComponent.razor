@@ -3,33 +3,87 @@
 @using DevExpress.ExpressApp
 @using DevExpress.ExpressApp.Blazor.Editors
 @using XafNavigatonHub.Module.Controllers
+@inject IJSRuntime JSRuntime
 
-<div class="navigation-hub" style="padding: 24px; overflow-y: auto; height: 100%;">
-    @if (pinnedButtons.Any())
+<div class="navigation-hub" style="padding: 24px; overflow-y: auto; height: 100%;"
+     @ondragover="OnOuterDragOver"
+     @ondragover:preventDefault="true"
+     @ondrop="OnOuterDrop"
+     @ondrop:preventDefault="true">
+
+    <div class="hub-section pinned-drop-zone @(isDraggingOverPinned ? "drop-zone-active" : "")"
+         style="margin-bottom: 32px; min-height: 60px; border-radius: 12px; padding: 8px; transition: background 0.2s, border-color 0.2s;
+                @(pinnedButtons.Any() || draggedButton != null ? "" : "")
+                @(isDraggingOverPinned ? "background: rgba(25,118,210,0.06); border: 2px dashed #1976D2;" : "border: 2px dashed transparent;")"
+         @ondragover="OnPinnedDragOver"
+         @ondragover:preventDefault="true"
+         @ondrop="OnPinnedDrop"
+         @ondrop:preventDefault="true"
+         @ondragleave="OnPinnedDragLeave">
+        <h5 style="color: #666; margin-bottom: 16px; font-weight: 600; padding: 0 8px;">
+            &#9733; Preferred Actions
+            @if (draggedButton != null && !pinnedButtons.Contains(draggedButton))
+            {
+                <span style="font-size: 12px; color: #1976D2; font-weight: 400; margin-left: 8px;">
+                    Drop here to pin
+                </span>
+            }
+        </h5>
+        <div style="display: flex; flex-wrap: wrap; gap: 16px; padding: 0 8px; min-height: 40px;">
+            @for (int i = 0; i < pinnedButtons.Count; i++)
+            {
+                var index = i;
+                var button = pinnedButtons[i];
+                <div class="hub-card @(draggedButton == button ? "dragging" : "")"
+                     style="@GetCardStyle(button.Color)"
+                     draggable="true"
+                     @ondragstart="() => OnDragStart(button, true, index)"
+                     @ondragend="OnDragEnd"
+                     @ondragover="() => OnPinnedItemDragOver(index)"
+                     @ondragover:preventDefault="true"
+                     @onclick="() => OnButtonClick(button)"
+                     @oncontextmenu="() => UnpinButton(button)"
+                     @oncontextmenu:preventDefault="true">
+                    @if (dropTargetIndex == index && draggedButton != null)
+                    {
+                        <div class="drop-indicator-left"></div>
+                    }
+                    @if (!string.IsNullOrEmpty(button.ExternalUrl))
+                    {
+                        <div class="hub-card-external-indicator" title="Opens in new tab">&#8599;</div>
+                    }
+                    @if (!string.IsNullOrEmpty(button.ImageUrl))
+                    {
+                        <div class="hub-card-icon">
+                            <img src="@button.ImageUrl"
+                                 style="width: 32px; height: 32px;" />
+                        </div>
+                    }
+                    <div class="hub-card-label">@button.Caption</div>
+                    @if (dropTargetIndex == index + 1 && index == pinnedButtons.Count - 1 && draggedButton != null)
+                    {
+                        <div class="drop-indicator-right"></div>
+                    }
+                </div>
+            }
+            @if (!pinnedButtons.Any() && draggedButton == null)
+            {
+                <div style="color: #aaa; font-size: 13px; padding: 8px 0;">
+                    Right-click or drag cards here to pin them
+                </div>
+            }
+        </div>
+    </div>
+
+    @if (draggedButton != null && isDragFromPinned)
     {
-        <div class="hub-section" style="margin-bottom: 32px;">
-            <h5 style="color: #666; margin-bottom: 16px; font-weight: 600;">
-                &#9733; Preferred Actions
-            </h5>
-            <div style="display: flex; flex-wrap: wrap; gap: 16px;">
-                @foreach (var button in pinnedButtons)
-                {
-                    <div class="hub-card"
-                         style="@GetCardStyle(button.Color)"
-                         @onclick="() => OnButtonClick(button)"
-                         @oncontextmenu="() => UnpinButton(button)"
-                         @oncontextmenu:preventDefault="true">
-                        @if (!string.IsNullOrEmpty(button.ImageUrl))
-                        {
-                            <div class="hub-card-icon">
-                                <img src="@button.ImageUrl"
-                                     style="width: 32px; height: 32px;" />
-                            </div>
-                        }
-                        <div class="hub-card-label">@button.Caption</div>
-                    </div>
-                }
-            </div>
+        <div class="unpin-drop-zone @(isDraggingOverUnpin ? "unpin-zone-active" : "")"
+             @ondragover="OnUnpinDragOver"
+             @ondragover:preventDefault="true"
+             @ondrop="OnUnpinDrop"
+             @ondrop:preventDefault="true"
+             @ondragleave="OnUnpinDragLeave">
+            &#128465; Drop here to unpin
         </div>
     }
 
@@ -42,19 +96,32 @@
             <div style="display: flex; flex-wrap: wrap; gap: 16px;">
                 @foreach (var button in category.Buttons)
                 {
-                    <div class="hub-card"
-                         style="@GetCardStyle(button.Color)"
-                         @onclick="() => OnButtonClick(button)"
-                         @oncontextmenu="() => PinButton(button)"
+                    var btn = button;
+                    var isPinned = pinnedButtons.Any(p => p.NavigationItemId == btn.NavigationItemId);
+                    <div class="hub-card @(draggedButton == btn ? "dragging" : "") @(isPinned ? "already-pinned" : "")"
+                         style="@GetCardStyle(btn.Color)"
+                         draggable="true"
+                         @ondragstart="() => OnDragStart(btn, false, -1)"
+                         @ondragend="OnDragEnd"
+                         @onclick="() => OnButtonClick(btn)"
+                         @oncontextmenu="() => PinButton(btn)"
                          @oncontextmenu:preventDefault="true">
-                        @if (!string.IsNullOrEmpty(button.ImageUrl))
+                        @if (!string.IsNullOrEmpty(btn.ExternalUrl))
+                        {
+                            <div class="hub-card-external-indicator" title="Opens in new tab">&#8599;</div>
+                        }
+                        @if (!string.IsNullOrEmpty(btn.ImageUrl))
                         {
                             <div class="hub-card-icon">
-                                <img src="@button.ImageUrl"
+                                <img src="@btn.ImageUrl"
                                      style="width: 32px; height: 32px;" />
                             </div>
                         }
-                        <div class="hub-card-label">@button.Caption</div>
+                        <div class="hub-card-label">@btn.Caption</div>
+                        @if (isPinned)
+                        {
+                            <div style="font-size: 10px; color: #1976D2;">&#9733; pinned</div>
+                        }
                     </div>
                 }
             </div>
@@ -74,17 +141,83 @@
         justify-content: center;
         gap: 12px;
         cursor: pointer;
-        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
         user-select: none;
+        position: relative;
     }
     .hub-card:hover {
         transform: translateY(-2px);
         box-shadow: 0 6px 20px rgba(0,0,0,0.15);
     }
+    .hub-card.dragging {
+        opacity: 0.4;
+        transform: scale(0.95);
+    }
+    .hub-card.already-pinned {
+        position: relative;
+    }
     .hub-card-label {
         font-size: 14px;
         font-weight: 500;
         text-align: center;
+    }
+
+    .pinned-drop-zone {
+        transition: background 0.2s ease, border-color 0.2s ease;
+    }
+    .drop-zone-active {
+        background: rgba(25,118,210,0.06) !important;
+        border-color: #1976D2 !important;
+    }
+
+    .drop-indicator-left {
+        position: absolute;
+        left: -10px;
+        top: 10%;
+        bottom: 10%;
+        width: 3px;
+        background: #1976D2;
+        border-radius: 2px;
+    }
+    .drop-indicator-right {
+        position: absolute;
+        right: -10px;
+        top: 10%;
+        bottom: 10%;
+        width: 3px;
+        background: #1976D2;
+        border-radius: 2px;
+    }
+
+    .unpin-drop-zone {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        margin-bottom: 24px;
+        border: 2px dashed #e57373;
+        border-radius: 12px;
+        color: #e57373;
+        font-size: 14px;
+        font-weight: 500;
+        transition: background 0.2s, border-color 0.2s, color 0.2s;
+    }
+    .unpin-zone-active {
+        background: rgba(229,115,115,0.08);
+        border-color: #d32f2f;
+        color: #d32f2f;
+    }
+
+    .hub-card-external-indicator {
+        position: absolute;
+        top: 6px;
+        right: 8px;
+        font-size: 14px;
+        color: #999;
+        line-height: 1;
+    }
+    .hub-card:hover .hub-card-external-indicator {
+        color: #1976D2;
     }
 </style>
 
@@ -94,6 +227,14 @@
 
     private List<HubCategoryData> categories = new();
     private List<HubButtonData> pinnedButtons = new();
+
+    // Drag state
+    private HubButtonData draggedButton;
+    private bool isDragFromPinned;
+    private int draggedPinnedIndex = -1;
+    private bool isDraggingOverPinned;
+    private bool isDraggingOverUnpin;
+    private int? dropTargetIndex;
 
     private NavigationHubController GetController() =>
         ViewItem?.Application?.MainWindow?.GetController<NavigationHubController>();
@@ -117,9 +258,17 @@
             .ToList();
     }
 
-    private void OnButtonClick(HubButtonData button)
+    private async Task OnButtonClick(HubButtonData button)
     {
-        GetController()?.NavigateToItem(button.NavigationItemId);
+        if (draggedButton != null) return; // Don't navigate during drag
+        if (!string.IsNullOrEmpty(button.ExternalUrl))
+        {
+            await JSRuntime.InvokeVoidAsync("window.open", button.ExternalUrl, "_blank");
+        }
+        else
+        {
+            GetController()?.NavigateToItem(button.NavigationItemId);
+        }
     }
 
     private void PinButton(HubButtonData button)
@@ -145,6 +294,157 @@
         controller.SetPinnedItems(pinned);
         RefreshData();
         StateHasChanged();
+    }
+
+    // --- Drag & Drop handlers ---
+
+    private void OnDragStart(HubButtonData button, bool fromPinned, int pinnedIndex)
+    {
+        draggedButton = button;
+        isDragFromPinned = fromPinned;
+        draggedPinnedIndex = pinnedIndex;
+        dropTargetIndex = null;
+    }
+
+    private void OnDragEnd()
+    {
+        draggedButton = null;
+        isDragFromPinned = false;
+        draggedPinnedIndex = -1;
+        isDraggingOverPinned = false;
+        isDraggingOverUnpin = false;
+        dropTargetIndex = null;
+        StateHasChanged();
+    }
+
+    private void OnPinnedDragOver()
+    {
+        if (draggedButton == null) return;
+        isDraggingOverPinned = true;
+        // If dragging over the container but not over a specific item, target the end
+        if (dropTargetIndex == null)
+        {
+            dropTargetIndex = pinnedButtons.Count;
+        }
+    }
+
+    private void OnPinnedDragLeave()
+    {
+        isDraggingOverPinned = false;
+        dropTargetIndex = null;
+    }
+
+    private void OnPinnedItemDragOver(int index)
+    {
+        if (draggedButton == null) return;
+        isDraggingOverPinned = true;
+        dropTargetIndex = index;
+    }
+
+    private void OnPinnedDrop()
+    {
+        if (draggedButton == null) return;
+
+        var controller = GetController();
+        if (controller == null) return;
+
+        var pinned = controller.GetPinnedItemIds();
+        var itemId = draggedButton.NavigationItemId;
+
+        if (isDragFromPinned)
+        {
+            // Reorder within pinned
+            var currentIndex = pinned.IndexOf(itemId);
+            if (currentIndex >= 0 && dropTargetIndex.HasValue)
+            {
+                pinned.RemoveAt(currentIndex);
+                var targetIdx = dropTargetIndex.Value;
+                if (targetIdx > currentIndex) targetIdx--;
+                if (targetIdx < 0) targetIdx = 0;
+                if (targetIdx > pinned.Count) targetIdx = pinned.Count;
+                pinned.Insert(targetIdx, itemId);
+            }
+        }
+        else
+        {
+            // Pin from category
+            if (!pinned.Contains(itemId))
+            {
+                if (dropTargetIndex.HasValue && dropTargetIndex.Value <= pinned.Count)
+                {
+                    pinned.Insert(dropTargetIndex.Value, itemId);
+                }
+                else
+                {
+                    pinned.Add(itemId);
+                }
+            }
+        }
+
+        controller.SetPinnedItems(pinned);
+        ResetDragState();
+        RefreshData();
+        StateHasChanged();
+    }
+
+    private void OnOuterDragOver()
+    {
+        // Allow drop
+    }
+
+    private void OnOuterDrop()
+    {
+        if (draggedButton == null) return;
+
+        // If dragged from pinned and dropped outside pinned section, unpin it
+        if (isDragFromPinned && !isDraggingOverPinned && !isDraggingOverUnpin)
+        {
+            var controller = GetController();
+            if (controller == null) return;
+            var pinned = controller.GetPinnedItemIds();
+            pinned.Remove(draggedButton.NavigationItemId);
+            controller.SetPinnedItems(pinned);
+            RefreshData();
+        }
+
+        ResetDragState();
+        StateHasChanged();
+    }
+
+    private void OnUnpinDragOver()
+    {
+        if (draggedButton == null) return;
+        isDraggingOverUnpin = true;
+    }
+
+    private void OnUnpinDragLeave()
+    {
+        isDraggingOverUnpin = false;
+    }
+
+    private void OnUnpinDrop()
+    {
+        if (draggedButton == null || !isDragFromPinned) return;
+
+        var controller = GetController();
+        if (controller == null) return;
+        var pinned = controller.GetPinnedItemIds();
+        pinned.Remove(draggedButton.NavigationItemId);
+        controller.SetPinnedItems(pinned);
+
+        ResetDragState();
+        RefreshData();
+        StateHasChanged();
+    }
+
+    private void ResetDragState()
+    {
+        draggedButton = null;
+        isDragFromPinned = false;
+        draggedPinnedIndex = -1;
+        isDraggingOverPinned = false;
+        isDraggingOverUnpin = false;
+        dropTargetIndex = null;
     }
 
     private string GetCardStyle(string color)
