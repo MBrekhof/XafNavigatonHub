@@ -131,12 +131,12 @@
 
 <style>
     .hub-section-header {
-        color: var(--dxbl-text-secondary, #666);
+        color: var(--dxds-color-content-neutral-secondary-rest, var(--bs-secondary-color, #666));
         margin-bottom: 16px;
         font-weight: 600;
     }
     .hub-empty-hint {
-        color: var(--dxbl-text-secondary, #aaa);
+        color: var(--dxds-color-content-neutral-secondary-rest, var(--bs-secondary-color, #aaa));
         font-size: 13px;
         padding: 8px 0;
     }
@@ -154,10 +154,10 @@
         transition: transform 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
         user-select: none;
         position: relative;
-        background: var(--dxbl-surface, var(--dxbl-card-bg, white));
-        border: 1px solid var(--dxbl-border-color, #e0e0e0);
+        background: var(--dxds-color-surface-neutral-default-rest, var(--bs-card-bg, var(--bs-body-bg, white)));
+        border: 1px solid var(--dxds-color-border-neutral-default-rest, var(--bs-border-color, #e0e0e0));
         box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        color: var(--dxbl-text, inherit);
+        color: var(--dxds-color-content-neutral-default-rest, var(--bs-body-color, inherit));
     }
     .hub-card:hover {
         transform: translateY(-2px);
@@ -174,7 +174,6 @@
         font-size: 14px;
         font-weight: 500;
         text-align: center;
-        color: var(--dxbl-text, inherit);
     }
 
     .pinned-drop-zone {
