@@ -1,7 +1,9 @@
+using System.Text;
 using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.SystemModule;
+using DevExpress.ExpressApp.Utils;
 using XafNavigatonHub.Module.BusinessObjects;
 using XafNavigatonHub.Module.Model;
 
@@ -41,6 +43,7 @@ public class NavigationHubController : WindowController
                     Id = button.Id,
                     Caption = button.Caption,
                     ImageName = button.ImageName,
+                    ImageUrl = ResolveImageUrl(button.ImageName),
                     NavigationItemId = button.NavigationItemId,
                     Color = button.Color
                 });
@@ -118,6 +121,21 @@ public class NavigationHubController : WindowController
             .ToList();
     }
 
+    private static string ResolveImageUrl(string imageName)
+    {
+        if (string.IsNullOrEmpty(imageName)) return string.Empty;
+        var imageInfo = ImageLoader.Instance.GetLargeImageInfo(imageName);
+        if (imageInfo.IsEmpty) imageInfo = ImageLoader.Instance.GetImageInfo(imageName);
+        if (imageInfo.IsEmpty) return string.Empty;
+        if (!imageInfo.IsUrlEmpty) return imageInfo.ImageUrl;
+        if (imageInfo.ImageBytes is { Length: > 0 } bytes)
+        {
+            var mime = imageInfo.IsSvgImage ? "image/svg+xml" : "image/png";
+            return $"data:{mime};base64,{Convert.ToBase64String(bytes)}";
+        }
+        return string.Empty;
+    }
+
     public void SetPinnedItems(List<string> navigationItemIds)
     {
         if (navigationItemIds == null) return;
@@ -151,6 +169,7 @@ public class HubButtonData
     public string Id { get; set; } = string.Empty;
     public string Caption { get; set; } = string.Empty;
     public string ImageName { get; set; } = string.Empty;
+    public string ImageUrl { get; set; } = string.Empty;
     public string NavigationItemId { get; set; } = string.Empty;
     public string Color { get; set; } = string.Empty;
 }

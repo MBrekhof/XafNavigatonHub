@@ -19,11 +19,10 @@
                          @onclick="() => OnButtonClick(button)"
                          @oncontextmenu="() => UnpinButton(button)"
                          @oncontextmenu:preventDefault="true">
-                        @if (!string.IsNullOrEmpty(button.ImageName))
+                        @if (!string.IsNullOrEmpty(button.ImageUrl))
                         {
                             <div class="hub-card-icon">
-                                <img src="_content/DevExpress.ExpressApp.Blazor/images/@(button.ImageName).svg"
-                                     onerror="this.style.display='none'"
+                                <img src="@button.ImageUrl"
                                      style="width: 32px; height: 32px;" />
                             </div>
                         }
@@ -48,11 +47,10 @@
                          @onclick="() => OnButtonClick(button)"
                          @oncontextmenu="() => PinButton(button)"
                          @oncontextmenu:preventDefault="true">
-                        @if (!string.IsNullOrEmpty(button.ImageName))
+                        @if (!string.IsNullOrEmpty(button.ImageUrl))
                         {
                             <div class="hub-card-icon">
-                                <img src="_content/DevExpress.ExpressApp.Blazor/images/@(button.ImageName).svg"
-                                     onerror="this.style.display='none'"
+                                <img src="@button.ImageUrl"
                                      style="width: 32px; height: 32px;" />
                             </div>
                         }
