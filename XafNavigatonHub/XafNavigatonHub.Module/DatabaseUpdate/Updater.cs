@@ -158,7 +158,7 @@ namespace XafNavigatonHub.Module.DatabaseUpdate
             {
                 var dept = ObjectSpace.CreateObject<Department>();
                 dept.Name = name;
-                dept.Code = name[..3].ToUpper();
+                dept.Code = name[..Math.Min(3, name.Length)].ToUpper();
                 dept.Manager = name switch
                 {
                     "Engineering" => "Alice Chen",
