@@ -1,4 +1,25 @@
-﻿<Application Logo="ExpressAppLogo">
+<Application Logo="ExpressAppLogo">
     <Options UIType="TabbedMDI" FormStyle="Ribbon" />
-    <NavigationItems NavigationStyle="Accordion" DefaultChildItemsDisplayStyle="List"/>
+    <NavigationItems NavigationStyle="Accordion" DefaultChildItemsDisplayStyle="List"
+                     StartupNavigationItem="NavigationHub_NavItem">
+        <Items>
+            <Item Id="NavigationHub_NavItem" Caption="Home"
+                  ViewId="NavigationHub_DashboardView" IsNewNode="True" Index="0"
+                  ImageName="Home" />
+        </Items>
+    </NavigationItems>
+    <Views>
+        <DashboardView Id="NavigationHub_DashboardView" IsNewNode="True">
+            <Items>
+                <ControlDetailItem Id="NavigationHubControl"
+                    ControlTypeName="XafNavigatonHub.Win.Editors.NavigationHubControl"
+                    IsNewNode="True" />
+            </Items>
+            <Layout>
+                <LayoutGroup Id="Main" ShowCaption="False" IsNewNode="True">
+                    <LayoutItem Id="NavigationHubControl" ViewItem="NavigationHubControl" IsNewNode="True" />
+                </LayoutGroup>
+            </Layout>
+        </DashboardView>
+    </Views>
 </Application>
