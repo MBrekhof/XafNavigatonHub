@@ -100,6 +100,12 @@ namespace XafNavigatonHub.Module.DatabaseUpdate
                 defaultRole.AddObjectPermission<ModelDifferenceAspect>(SecurityOperations.ReadWriteAccess, "Owner.UserId = ToStr(CurrentUserId())", SecurityPermissionState.Allow);
                 defaultRole.AddTypePermissionsRecursively<ModelDifference>(SecurityOperations.Create, SecurityPermissionState.Allow);
                 defaultRole.AddTypePermissionsRecursively<ModelDifferenceAspect>(SecurityOperations.Create, SecurityPermissionState.Allow);
+                defaultRole.AddObjectPermissionFromLambda<UserHubPreference>(
+                    SecurityOperations.ReadWriteAccess,
+                    p => p.UserId == (Guid)CurrentUserIdOperator.CurrentUserId(),
+                    SecurityPermissionState.Allow);
+                defaultRole.AddTypePermissionsRecursively<UserHubPreference>(
+                    SecurityOperations.Create, SecurityPermissionState.Allow);
             }
             return defaultRole;
         }

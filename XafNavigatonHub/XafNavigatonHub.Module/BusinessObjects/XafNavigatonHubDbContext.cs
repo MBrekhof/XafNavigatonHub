@@ -25,6 +25,7 @@ namespace XafNavigatonHub.Module.BusinessObjects
         public DbSet<DashboardData> DashboardData { get; set; }
         public DbSet<Event> Events { get; set; }
         public DbSet<HCategory> HCategories { get; set; }
+        public DbSet<UserHubPreference> UserHubPreferences { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
