@@ -1,0 +1,10 @@
+<Solution>
+  <Configurations>
+    <BuildType Name="Debug" />
+    <BuildType Name="EasyTest" />
+    <BuildType Name="Release" />
+  </Configurations>
+  <Project Path="XafNavigatonHub/XafNavigatonHub.Blazor.Server/XafNavigatonHub.Blazor.Server.csproj" />
+  <Project Path="XafNavigatonHub/XafNavigatonHub.Module/XafNavigatonHub.Module.csproj" />
+  <Project Path="XafNavigatonHub/XafNavigatonHub.Win/XafNavigatonHub.Win.csproj" />
+</Solution>

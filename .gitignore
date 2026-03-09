@@ -1,0 +1,20 @@
+## .NET
+bin/
+obj/
+*.user
+*.suo
+*.cache
+*.log
+
+## Visual Studio
+.vs/
+*.rsuser
+launchSettings.json
+
+## OS
+Thumbs.db
+Desktop.ini
+.DS_Store
+
+## DevExpress
+*.xafml.bak
