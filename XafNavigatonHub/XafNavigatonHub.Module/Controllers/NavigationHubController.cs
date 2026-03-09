@@ -62,9 +62,12 @@ public class NavigationHubController : WindowController
     {
         foreach (var item in items)
         {
-            if (item.Data is ViewShortcut)
+            if (item.Data is ViewShortcut shortcut)
             {
                 ids.Add(item.GetIdPath());
+                // Also add the ViewId so buttons can match by either path or ViewId
+                if (!string.IsNullOrEmpty(shortcut.ViewId))
+                    ids.Add(shortcut.ViewId);
             }
             if (item.Items.Count > 0)
             {
