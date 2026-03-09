@@ -15,18 +15,18 @@ public interface IModelNavigationHubViewItem : IModelViewItem;
 public class NavigationHubViewItem : ViewItem, IComponentContentHolder, IComplexViewItem
 {
     private XafApplication application;
-    private IObjectSpace objectSpace;
     private NavigationHubComponentModel componentModel;
 
     public NavigationHubViewItem(IModelViewItem model, Type objectType)
         : base(objectType, model.Id) { }
 
     public RenderFragment ComponentContent =>
-        ComponentModelObserver.Create(componentModel, componentModel.GetComponentContent());
+        componentModel != null
+            ? ComponentModelObserver.Create(componentModel, componentModel.GetComponentContent())
+            : builder => { };
 
     void IComplexViewItem.Setup(IObjectSpace objectSpace, XafApplication application)
     {
-        this.objectSpace = objectSpace;
         this.application = application;
     }
 
@@ -37,9 +37,12 @@ public class NavigationHubViewItem : ViewItem, IComponentContentHolder, IComplex
         return componentModel;
     }
 
+    private NavigationHubController GetHubController() =>
+        application.MainWindow?.GetController<NavigationHubController>();
+
     private void RefreshData()
     {
-        var controller = application.MainWindow?.GetController<NavigationHubController>();
+        var controller = GetHubController();
         if (controller == null) return;
 
         var categories = controller.GetHubData();
@@ -47,7 +50,7 @@ public class NavigationHubViewItem : ViewItem, IComponentContentHolder, IComplex
         var allButtons = categories.SelectMany(c => c.Buttons).ToList();
         var pinnedButtons = pinnedIds
             .Select(id => allButtons.FirstOrDefault(b => b.NavigationItemId == id))
-            .Where(b => b != null)
+            .OfType<HubButtonData>()
             .ToList();
 
         componentModel.Categories = categories;
@@ -59,13 +62,12 @@ public class NavigationHubViewItem : ViewItem, IComponentContentHolder, IComplex
 
     private void OnButtonClicked(HubButtonData button)
     {
-        var controller = application.MainWindow?.GetController<NavigationHubController>();
-        controller?.NavigateToItem(button.NavigationItemId);
+        GetHubController()?.NavigateToItem(button.NavigationItemId);
     }
 
     private void OnButtonPinned(HubButtonData button)
     {
-        var controller = application.MainWindow?.GetController<NavigationHubController>();
+        var controller = GetHubController();
         if (controller == null) return;
         var pinned = controller.GetPinnedItemIds();
         if (!pinned.Contains(button.NavigationItemId))
@@ -78,7 +80,7 @@ public class NavigationHubViewItem : ViewItem, IComponentContentHolder, IComplex
 
     private void OnButtonUnpinned(HubButtonData button)
     {
-        var controller = application.MainWindow?.GetController<NavigationHubController>();
+        var controller = GetHubController();
         if (controller == null) return;
         var pinned = controller.GetPinnedItemIds();
         pinned.Remove(button.NavigationItemId);
