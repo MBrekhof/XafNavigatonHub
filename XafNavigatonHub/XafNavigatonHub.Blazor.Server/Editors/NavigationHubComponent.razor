@@ -1,28 +1,32 @@
 @namespace XafNavigatonHub.Blazor.Server.Editors
 
+@using DevExpress.ExpressApp
 @using DevExpress.ExpressApp.Blazor.Editors
 @using XafNavigatonHub.Module.Controllers
 
-<div class="navigation-hub" style="padding: 24px; overflow-y: auto;">
-    @if (PinnedButtons.Any())
+<div class="navigation-hub" style="padding: 24px; overflow-y: auto; height: 100%;">
+    @if (pinnedButtons.Any())
     {
         <div class="hub-section" style="margin-bottom: 32px;">
             <h5 style="color: #666; margin-bottom: 16px; font-weight: 600;">
-                ★ Preferred Actions
+                &#9733; Preferred Actions
             </h5>
             <div style="display: flex; flex-wrap: wrap; gap: 16px;">
-                @foreach (var button in PinnedButtons)
+                @foreach (var button in pinnedButtons)
                 {
                     <div class="hub-card"
                          style="@GetCardStyle(button.Color)"
                          @onclick="() => OnButtonClick(button)"
                          @oncontextmenu="() => UnpinButton(button)"
                          @oncontextmenu:preventDefault="true">
-                        <div class="hub-card-icon">
-                            <img src="_content/DevExpress.ExpressApp.Blazor/images/@(button.ImageName).svg"
-                                 onerror="this.style.display='none'"
-                                 style="width: 32px; height: 32px;" />
-                        </div>
+                        @if (!string.IsNullOrEmpty(button.ImageName))
+                        {
+                            <div class="hub-card-icon">
+                                <img src="_content/DevExpress.ExpressApp.Blazor/images/@(button.ImageName).svg"
+                                     onerror="this.style.display='none'"
+                                     style="width: 32px; height: 32px;" />
+                            </div>
+                        }
                         <div class="hub-card-label">@button.Caption</div>
                     </div>
                 }
@@ -30,7 +34,7 @@
         </div>
     }
 
-    @foreach (var category in Categories)
+    @foreach (var category in categories)
     {
         <div class="hub-section" style="margin-bottom: 32px;">
             <h5 style="color: #666; margin-bottom: 16px; font-weight: 600;">
@@ -44,11 +48,14 @@
                          @onclick="() => OnButtonClick(button)"
                          @oncontextmenu="() => PinButton(button)"
                          @oncontextmenu:preventDefault="true">
-                        <div class="hub-card-icon">
-                            <img src="_content/DevExpress.ExpressApp.Blazor/images/@(button.ImageName).svg"
-                                 onerror="this.style.display='none'"
-                                 style="width: 32px; height: 32px;" />
-                        </div>
+                        @if (!string.IsNullOrEmpty(button.ImageName))
+                        {
+                            <div class="hub-card-icon">
+                                <img src="_content/DevExpress.ExpressApp.Blazor/images/@(button.ImageName).svg"
+                                     onerror="this.style.display='none'"
+                                     style="width: 32px; height: 32px;" />
+                            </div>
+                        }
                         <div class="hub-card-label">@button.Caption</div>
                     </div>
                 }
@@ -84,30 +91,67 @@
 </style>
 
 @code {
-    [Parameter] public List<HubCategoryData> Categories { get; set; } = new();
-    [Parameter] public List<HubButtonData> PinnedButtons { get; set; } = new();
-    [Parameter] public EventCallback<HubButtonData> ButtonClicked { get; set; }
-    [Parameter] public EventCallback<HubButtonData> ButtonPinned { get; set; }
-    [Parameter] public EventCallback<HubButtonData> ButtonUnpinned { get; set; }
+    [CascadingParameter]
+    public BlazorControlViewItem ViewItem { get; set; }
+
+    private List<HubCategoryData> categories = new();
+    private List<HubButtonData> pinnedButtons = new();
+
+    private NavigationHubController GetController() =>
+        ViewItem?.Application?.MainWindow?.GetController<NavigationHubController>();
+
+    protected override void OnInitialized()
+    {
+        RefreshData();
+    }
+
+    private void RefreshData()
+    {
+        var controller = GetController();
+        if (controller == null) return;
+
+        categories = controller.GetHubData();
+        var pinnedIds = controller.GetPinnedItemIds();
+        var allButtons = categories.SelectMany(c => c.Buttons).ToList();
+        pinnedButtons = pinnedIds
+            .Select(id => allButtons.FirstOrDefault(b => b.NavigationItemId == id))
+            .OfType<HubButtonData>()
+            .ToList();
+    }
+
+    private void OnButtonClick(HubButtonData button)
+    {
+        GetController()?.NavigateToItem(button.NavigationItemId);
+    }
+
+    private void PinButton(HubButtonData button)
+    {
+        var controller = GetController();
+        if (controller == null) return;
+        var pinned = controller.GetPinnedItemIds();
+        if (!pinned.Contains(button.NavigationItemId))
+        {
+            pinned.Add(button.NavigationItemId);
+            controller.SetPinnedItems(pinned);
+            RefreshData();
+            StateHasChanged();
+        }
+    }
+
+    private void UnpinButton(HubButtonData button)
+    {
+        var controller = GetController();
+        if (controller == null) return;
+        var pinned = controller.GetPinnedItemIds();
+        pinned.Remove(button.NavigationItemId);
+        controller.SetPinnedItems(pinned);
+        RefreshData();
+        StateHasChanged();
+    }
 
     private string GetCardStyle(string color)
     {
         var c = string.IsNullOrEmpty(color) ? "#1976D2" : color;
         return $"background: white; border: 1px solid #e0e0e0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid {c};";
-    }
-
-    private async Task OnButtonClick(HubButtonData button)
-    {
-        await ButtonClicked.InvokeAsync(button);
-    }
-
-    private async Task PinButton(HubButtonData button)
-    {
-        await ButtonPinned.InvokeAsync(button);
-    }
-
-    private async Task UnpinButton(HubButtonData button)
-    {
-        await ButtonUnpinned.InvokeAsync(button);
     }
 }
