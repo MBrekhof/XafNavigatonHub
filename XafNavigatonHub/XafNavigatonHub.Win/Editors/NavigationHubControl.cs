@@ -35,11 +35,11 @@ public class NavigationHubControl : DevExpress.XtraEditors.XtraUserControl
 
     public NavigationHubControl()
     {
-        _scrollPanel = new Panel
+        DoubleBuffered = true;
+        _scrollPanel = new DoubleBufferedPanel
         {
             Dock = DockStyle.Fill,
             AutoScroll = true,
-            BackColor = Color.Transparent,
         };
         _scrollPanel.Paint += ScrollPanel_Paint;
         _scrollPanel.MouseClick += ScrollPanel_MouseClick;
@@ -527,5 +527,14 @@ public class NavigationHubControl : DevExpress.XtraEditors.XtraUserControl
             _unpinMenu?.Dispose();
         }
         base.Dispose(disposing);
+    }
+
+    private class DoubleBufferedPanel : Panel
+    {
+        public DoubleBufferedPanel()
+        {
+            DoubleBuffered = true;
+            SetStyle(ControlStyles.AllPaintingInWmPaint | ControlStyles.UserPaint | ControlStyles.OptimizedDoubleBuffer, true);
+        }
     }
 }
