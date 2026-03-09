@@ -44,4 +44,6 @@ public interface IModelHubButton : IModelNode
     string Color { get; set; }
 
     int SortOrder { get; set; }
+
+    string ExternalUrl { get; set; }
 }

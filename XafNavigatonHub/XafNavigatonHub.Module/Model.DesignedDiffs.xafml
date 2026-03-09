@@ -11,6 +11,7 @@
       <Buttons>
         <Item Id="Users" Caption="Users" ImageName="BO_User" NavigationItemId="ApplicationUser_ListView" Color="#1976D2" SortOrder="0" IsNewNode="True" />
         <Item Id="Roles" Caption="Roles" ImageName="BO_Role" NavigationItemId="PermissionPolicyRole_ListView" Color="#1976D2" SortOrder="1" IsNewNode="True" />
+        <Item Id="Documentation" Caption="Documentation" ImageName="Action_AboutInfo" ExternalUrl="https://docs.devexpress.com" Color="#7B1FA2" SortOrder="2" IsNewNode="True" />
       </Buttons>
     </Item>
   </NavigationHub>

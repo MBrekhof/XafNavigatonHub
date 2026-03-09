@@ -36,7 +36,8 @@ public class NavigationHubController : WindowController
             var buttons = new List<HubButtonData>();
             foreach (IModelHubButton button in category.Buttons.OrderBy(b => b.SortOrder))
             {
-                if (!string.IsNullOrEmpty(button.NavigationItemId) && !permittedItemIds.Contains(button.NavigationItemId))
+                var isExternal = !string.IsNullOrEmpty(button.ExternalUrl);
+                if (!isExternal && !string.IsNullOrEmpty(button.NavigationItemId) && !permittedItemIds.Contains(button.NavigationItemId))
                     continue;
                 buttons.Add(new HubButtonData
                 {
@@ -45,7 +46,8 @@ public class NavigationHubController : WindowController
                     ImageName = button.ImageName,
                     ImageUrl = ResolveImageUrl(button.ImageName),
                     NavigationItemId = button.NavigationItemId,
-                    Color = button.Color
+                    Color = button.Color,
+                    ExternalUrl = button.ExternalUrl ?? string.Empty
                 });
             }
             if (buttons.Count > 0)
@@ -172,4 +174,5 @@ public class HubButtonData
     public string ImageUrl { get; set; } = string.Empty;
     public string NavigationItemId { get; set; } = string.Empty;
     public string Color { get; set; } = string.Empty;
+    public string ExternalUrl { get; set; } = string.Empty;
 }
