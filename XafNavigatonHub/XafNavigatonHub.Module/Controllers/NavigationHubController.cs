@@ -67,7 +67,7 @@ public class NavigationHubController : WindowController
     {
         foreach (var item in items)
         {
-            if (item.Data is ViewShortcut shortcut)
+            if (item.Enabled && item.Active && item.Data is ViewShortcut shortcut)
             {
                 ids.Add(item.GetIdPath());
                 // Also add the ViewId so buttons can match by either path or ViewId
@@ -88,7 +88,7 @@ public class NavigationHubController : WindowController
         if (navAction == null) return;
 
         var item = FindItemById(navAction.Items, navigationItemId);
-        if (item != null)
+        if (item != null && item.Enabled && item.Active)
         {
             navAction.DoExecute(item);
         }
