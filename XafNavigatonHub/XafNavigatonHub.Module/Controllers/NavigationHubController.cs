@@ -1,3 +1,4 @@
+using DevExpress.Data.Filtering;
 using DevExpress.ExpressApp;
 using DevExpress.ExpressApp.Actions;
 using DevExpress.ExpressApp.SystemModule;
@@ -11,11 +12,6 @@ public class NavigationHubController : WindowController
     public NavigationHubController()
     {
         TargetWindowType = WindowType.Main;
-    }
-
-    protected override void OnActivated()
-    {
-        base.OnActivated();
     }
 
     public List<HubCategoryData> GetHubData()
@@ -66,7 +62,7 @@ public class NavigationHubController : WindowController
     {
         foreach (var item in items)
         {
-            if (item.Data is ViewShortcut shortcut)
+            if (item.Data is ViewShortcut)
             {
                 ids.Add(item.GetIdPath());
             }
@@ -80,12 +76,13 @@ public class NavigationHubController : WindowController
     public void NavigateToItem(string navigationItemId)
     {
         var showNavController = Frame.GetController<ShowNavigationItemController>();
-        if (showNavController == null) return;
+        var navAction = showNavController?.ShowNavigationItemAction;
+        if (navAction == null) return;
 
-        var item = FindItemById(showNavController.ShowNavigationItemAction.Items, navigationItemId);
+        var item = FindItemById(navAction.Items, navigationItemId);
         if (item != null)
         {
-            showNavController.ShowNavigationItemAction.DoExecute(item);
+            navAction.DoExecute(item);
         }
     }
 
@@ -93,6 +90,7 @@ public class NavigationHubController : WindowController
     {
         foreach (var item in items)
         {
+            // Match by full path (category/item) or by ViewId for flexibility
             if (item.GetIdPath() == id || (item.Data is ViewShortcut vs && vs.ViewId == id))
                 return item;
             if (item.Items.Count > 0)
@@ -106,10 +104,12 @@ public class NavigationHubController : WindowController
 
     public List<string> GetPinnedItemIds()
     {
+        if (SecuritySystem.CurrentUserId is not Guid userId)
+            return new List<string>();
+
         using var os = Application.CreateObjectSpace(typeof(UserHubPreference));
-        var userId = (Guid)SecuritySystem.CurrentUserId;
         return os.GetObjects<UserHubPreference>(
-            DevExpress.Data.Filtering.CriteriaOperator.Parse("UserId = ?", userId))
+            CriteriaOperator.Parse("UserId = ?", userId))
             .OrderBy(p => p.SortOrder)
             .Select(p => p.NavigationItemId)
             .ToList();
@@ -117,10 +117,12 @@ public class NavigationHubController : WindowController
 
     public void SetPinnedItems(List<string> navigationItemIds)
     {
+        if (navigationItemIds == null) return;
+        if (SecuritySystem.CurrentUserId is not Guid userId) return;
+
         using var os = Application.CreateObjectSpace(typeof(UserHubPreference));
-        var userId = (Guid)SecuritySystem.CurrentUserId;
         var existing = os.GetObjects<UserHubPreference>(
-            DevExpress.Data.Filtering.CriteriaOperator.Parse("UserId = ?", userId)).ToList();
+            CriteriaOperator.Parse("UserId = ?", userId)).ToList();
         foreach (var e in existing)
             os.Delete(e);
         for (int i = 0; i < navigationItemIds.Count; i++)
@@ -136,16 +138,16 @@ public class NavigationHubController : WindowController
 
 public class HubCategoryData
 {
-    public string Id { get; set; }
-    public string Caption { get; set; }
+    public string Id { get; set; } = string.Empty;
+    public string Caption { get; set; } = string.Empty;
     public List<HubButtonData> Buttons { get; set; } = new();
 }
 
 public class HubButtonData
 {
-    public string Id { get; set; }
-    public string Caption { get; set; }
-    public string ImageName { get; set; }
-    public string NavigationItemId { get; set; }
-    public string Color { get; set; }
+    public string Id { get; set; } = string.Empty;
+    public string Caption { get; set; } = string.Empty;
+    public string ImageName { get; set; } = string.Empty;
+    public string NavigationItemId { get; set; } = string.Empty;
+    public string Color { get; set; } = string.Empty;
 }
