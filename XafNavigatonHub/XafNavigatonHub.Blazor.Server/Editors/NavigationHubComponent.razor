@@ -1,0 +1,113 @@
+@namespace XafNavigatonHub.Blazor.Server.Editors
+
+@using DevExpress.ExpressApp.Blazor.Editors
+@using XafNavigatonHub.Module.Controllers
+
+<div class="navigation-hub" style="padding: 24px; overflow-y: auto;">
+    @if (PinnedButtons.Any())
+    {
+        <div class="hub-section" style="margin-bottom: 32px;">
+            <h5 style="color: #666; margin-bottom: 16px; font-weight: 600;">
+                ★ Preferred Actions
+            </h5>
+            <div style="display: flex; flex-wrap: wrap; gap: 16px;">
+                @foreach (var button in PinnedButtons)
+                {
+                    <div class="hub-card"
+                         style="@GetCardStyle(button.Color)"
+                         @onclick="() => OnButtonClick(button)"
+                         @oncontextmenu="() => UnpinButton(button)"
+                         @oncontextmenu:preventDefault="true">
+                        <div class="hub-card-icon">
+                            <img src="_content/DevExpress.ExpressApp.Blazor/images/@(button.ImageName).svg"
+                                 onerror="this.style.display='none'"
+                                 style="width: 32px; height: 32px;" />
+                        </div>
+                        <div class="hub-card-label">@button.Caption</div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+
+    @foreach (var category in Categories)
+    {
+        <div class="hub-section" style="margin-bottom: 32px;">
+            <h5 style="color: #666; margin-bottom: 16px; font-weight: 600;">
+                @category.Caption
+            </h5>
+            <div style="display: flex; flex-wrap: wrap; gap: 16px;">
+                @foreach (var button in category.Buttons)
+                {
+                    <div class="hub-card"
+                         style="@GetCardStyle(button.Color)"
+                         @onclick="() => OnButtonClick(button)"
+                         @oncontextmenu="() => PinButton(button)"
+                         @oncontextmenu:preventDefault="true">
+                        <div class="hub-card-icon">
+                            <img src="_content/DevExpress.ExpressApp.Blazor/images/@(button.ImageName).svg"
+                                 onerror="this.style.display='none'"
+                                 style="width: 32px; height: 32px;" />
+                        </div>
+                        <div class="hub-card-label">@button.Caption</div>
+                    </div>
+                }
+            </div>
+        </div>
+    }
+</div>
+
+<style>
+    .hub-card {
+        width: 160px;
+        min-height: 120px;
+        border-radius: 12px;
+        padding: 20px 16px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 12px;
+        cursor: pointer;
+        transition: transform 0.15s ease, box-shadow 0.15s ease;
+        user-select: none;
+    }
+    .hub-card:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+    }
+    .hub-card-label {
+        font-size: 14px;
+        font-weight: 500;
+        text-align: center;
+    }
+</style>
+
+@code {
+    [Parameter] public List<HubCategoryData> Categories { get; set; } = new();
+    [Parameter] public List<HubButtonData> PinnedButtons { get; set; } = new();
+    [Parameter] public EventCallback<HubButtonData> ButtonClicked { get; set; }
+    [Parameter] public EventCallback<HubButtonData> ButtonPinned { get; set; }
+    [Parameter] public EventCallback<HubButtonData> ButtonUnpinned { get; set; }
+
+    private string GetCardStyle(string color)
+    {
+        var c = string.IsNullOrEmpty(color) ? "#1976D2" : color;
+        return $"background: white; border: 1px solid #e0e0e0; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border-left: 4px solid {c};";
+    }
+
+    private async Task OnButtonClick(HubButtonData button)
+    {
+        await ButtonClicked.InvokeAsync(button);
+    }
+
+    private async Task PinButton(HubButtonData button)
+    {
+        await ButtonPinned.InvokeAsync(button);
+    }
+
+    private async Task UnpinButton(HubButtonData button)
+    {
+        await ButtonUnpinned.InvokeAsync(button);
+    }
+}
