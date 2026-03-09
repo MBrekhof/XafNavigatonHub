@@ -18,3 +18,8 @@ Desktop.ini
 
 ## DevExpress
 *.xafml.bak
+
+## Test & debug artifacts
+test_*.py
+*.png
+!**/Images/*.png

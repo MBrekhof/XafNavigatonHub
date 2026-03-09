@@ -91,21 +91,8 @@ public class NavigationHubControl : DevExpress.XtraEditors.XtraUserControl
         g.TextRenderingHint = TextRenderingHint.ClearTypeGridFit;
         _cardRects.Clear();
 
-        var skin = CommonSkins.GetSkin(UserLookAndFeel.Default);
-        var bgColor = GetSkinBackColor(skin);
-        // If skin returned black/transparent, derive from parent form
-        if (bgColor == Color.Black || bgColor.A == 0)
-        {
-            var form = FindForm();
-            if (form != null && form.BackColor != Color.Black && form.BackColor.A > 0)
-                bgColor = form.BackColor;
-            else
-                bgColor = SystemColors.Control;
-        }
-        var cardBgColor = GetSkinCardColor(skin, bgColor);
-        var textColor = GetSkinTextColor(skin, bgColor);
+        GetSkinColors(out var bgColor, out var cardBgColor, out var textColor, out var borderColor);
         var headerColor = Color.FromArgb(180, textColor);
-        var borderColor = GetSkinBorderColor(bgColor);
 
         _scrollPanel.BackColor = bgColor;
 
@@ -412,68 +399,34 @@ public class NavigationHubControl : DevExpress.XtraEditors.XtraUserControl
 
     #region Skin Helpers
 
-    private static Color GetSkinBackColor(Skin skin)
+    private static void GetSkinColors(out Color bgColor, out Color cardBgColor, out Color textColor, out Color borderColor)
     {
         try
         {
-            // Try multiple skin elements for background color
-            foreach (var key in new[] { CommonSkins.SkinForm, CommonSkins.SkinTextBorder, "Form" })
+            var commonSkin = CommonSkins.GetSkin(UserLookAndFeel.Default);
+            var svgPalette = commonSkin.SvgPalettes[Skin.DefaultSkinPaletteName] as SvgPalette;
+            if (svgPalette != null)
             {
-                var element = skin[key];
-                if (element?.Color.BackColor is { } c && c != Color.Empty && c.A > 0 && c != Color.Black)
-                    return c;
-            }
-            // Fallback: use the LookAndFeel's actual control back color
-            var laf = UserLookAndFeel.Default;
-            var painter = CommonSkins.GetSkin(laf);
-            if (painter != null)
-            {
-                var formSkin = painter[CommonSkins.SkinForm];
-                if (formSkin?.Color.BackColor2 is { } c2 && c2 != Color.Empty && c2.A > 0 && c2 != Color.Black)
-                    return c2;
+                bgColor = GetPaletteColor(svgPalette, "Paint", SystemColors.Control);
+                cardBgColor = GetPaletteColor(svgPalette, "Paint High", Color.White);
+                textColor = GetPaletteColor(svgPalette, "Brush", Color.FromArgb(50, 50, 50));
+                borderColor = GetPaletteColor(svgPalette, "Paint Shadow", Color.FromArgb(224, 224, 224));
+                return;
             }
         }
         catch { }
-        return SystemColors.Control;
+
+        // Fallback for raster skins
+        bgColor = SystemColors.Control;
+        cardBgColor = Color.White;
+        textColor = Color.FromArgb(50, 50, 50);
+        borderColor = Color.FromArgb(224, 224, 224);
     }
 
-    private static Color GetSkinCardColor(Skin skin, Color bgColor)
+    private static Color GetPaletteColor(SvgPalette palette, string colorName, Color fallback)
     {
-        try
-        {
-            var element = skin[CommonSkins.SkinHighlightedItem];
-            if (element != null)
-            {
-                var c = element.Color.BackColor;
-                if (c != Color.Empty && c.A > 0 && c != Color.Black) return c;
-            }
-        }
-        catch { }
-        return bgColor.GetBrightness() < 0.5f
-            ? Color.FromArgb(255, Math.Min(bgColor.R + 25, 255), Math.Min(bgColor.G + 25, 255), Math.Min(bgColor.B + 25, 255))
-            : Color.White;
-    }
-
-    private static Color GetSkinTextColor(Skin skin, Color bgColor)
-    {
-        try
-        {
-            var element = skin[CommonSkins.SkinLabel];
-            if (element != null)
-            {
-                var c = element.Color.ForeColor;
-                if (c != Color.Empty && c.A > 0) return c;
-            }
-        }
-        catch { }
-        return bgColor.GetBrightness() < 0.5f ? Color.FromArgb(230, 230, 230) : Color.FromArgb(50, 50, 50);
-    }
-
-    private static Color GetSkinBorderColor(Color bgColor)
-    {
-        return bgColor.GetBrightness() < 0.5f
-            ? Color.FromArgb(60, 255, 255, 255)
-            : Color.FromArgb(224, 224, 224);
+        var entry = palette[colorName];
+        return entry != null ? entry.Value : fallback;
     }
 
     #endregion

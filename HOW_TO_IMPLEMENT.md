@@ -53,12 +53,12 @@ Add seed data in `XafNavigatonHub.Module/DatabaseUpdate/Updater.cs` inside `Upda
 ## Security & Permissions
 
 - Roles and permissions are managed via `PermissionPolicyRole`
-- Default roles (Admin, Default) are created in the `Updater`
+- Default roles (Admin, Default, HR, Sales) are created in the `Updater`
 - To restrict access to a new business object, add type/object/member permissions to the relevant role
 
 ## NavigationHub: Adding Buttons
 
-Hub buttons are configured via the XAF Application Model. Each button belongs to a category and links to an XAF navigation item.
+Hub buttons are configured via the XAF Application Model. Each button belongs to a category and links to an XAF navigation item or an external URL.
 
 ### Via Model Editor
 
@@ -72,6 +72,7 @@ Hub buttons are configured via the XAF Application Model. Each button belongs to
    - `NavigationItemId` — the `GetIdPath()` of the target navigation item (e.g., `Default/Employee_ListView`)
    - `Color` — hex accent color (e.g., `#4CAF50`)
    - `SortOrder` — ordering within category
+   - `ExternalUrl` — (optional) URL to open in a new browser tab instead of navigating within XAF
 
 ### Via Model.DesignedDiffs.xafml
 
@@ -82,6 +83,9 @@ Hub buttons are configured via the XAF Application Model. Each button belongs to
       <Item Id="Employees" Caption="Employees" ImageName="BO_Employee"
         NavigationItemId="Employee_ListView" Color="#4CAF50" SortOrder="0"
         IsNewNode="True" />
+      <Item Id="Docs" Caption="Documentation" ImageName="Action_Export"
+        ExternalUrl="https://docs.example.com" Color="#7B1FA2" SortOrder="1"
+        IsNewNode="True" />
     </Buttons>
   </Item>
 </NavigationHub>
@@ -89,11 +93,16 @@ Hub buttons are configured via the XAF Application Model. Each button belongs to
 
 ### Role-Based Visibility
 
-Buttons are automatically hidden if the current user doesn't have navigation permission for the linked view. No extra configuration needed — XAF's built-in `NavigationPermission` handles it.
+Buttons are automatically hidden if the current user doesn't have navigation permission for the linked view. No extra configuration needed — XAF's built-in `NavigationPermission` handles it. External URL buttons are always visible regardless of permissions.
 
 ### User Pinned Favorites
 
-Users can right-click a card to pin/unpin it to the "Preferred Actions" row. Pins are stored per-user in the `UserHubPreference` table.
+Users can pin/unpin cards to the "Preferred Actions" row:
+
+- **Right-click** a card → Pin to Favorites / Unpin
+- **Drag & drop** (Blazor only) — drag a card into the pinned area, reorder pinned items, or drag out to unpin
+
+Pins are stored per-user in the `UserHubPreference` table and persist across sessions.
 
 ## Model Customization
 
