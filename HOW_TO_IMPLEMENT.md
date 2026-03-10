@@ -26,25 +26,59 @@ public class MyEntity : BaseObject
 
 Place platform-agnostic controllers in `XafNavigatonHub.Module/Controllers/`. For platform-specific controllers, use the respective frontend project's `Controllers/` folder.
 
+### Controller Patterns Used in This Project
+
+**WindowController (main window scope)** — Used when you need access to the main window's frame, e.g. to read navigation items or intercept tab closing. Set `TargetWindowType = WindowType.Main` in the constructor.
+
 ```csharp
-using DevExpress.ExpressApp;
-
-namespace XafNavigatonHub.Module.Controllers;
-
-public class MyController : ViewController
+public class MyMainWindowController : WindowController
 {
-    public MyController()
+    public MyMainWindowController()
     {
-        TargetObjectType = typeof(MyEntity);
+        TargetWindowType = WindowType.Main;
     }
 
     protected override void OnActivated()
     {
         base.OnActivated();
-        // Add logic here
+        // Access Frame.GetController<T>() to interact with other controllers
+        // Access Application.Model to read model extensions
     }
 }
 ```
+
+**ViewController\<DashboardView\> (view-specific)** — Used when you need to interact with controls inside a DashboardView, such as finding the hub control in a `ControlDetailItem`.
+
+```csharp
+public class MyDashboardController : ViewController<DashboardView>
+{
+    protected override void OnViewControlsCreated()
+    {
+        base.OnViewControlsCreated();
+        foreach (var item in View.GetItems<ControlViewItem>())
+        {
+            if (item.Control is MyCustomControl control)
+            {
+                // Initialize the control, e.g. pass it data from a WindowController
+                var controller = Application.MainWindow?.GetController<NavigationHubController>();
+                if (controller != null)
+                    control.Initialize(controller);
+            }
+        }
+    }
+}
+```
+
+### Existing Controllers
+
+| Controller | Type | Project | Purpose |
+|---|---|---|---|
+| `NavigationHubController` | `WindowController` | Module | Core hub logic: reads model config, resolves icons, handles navigation, manages pinned favorites |
+| `HubTabController` | `WindowController` | Blazor.Server | Prevents the hub tab from being closed in Blazor TabbedMDI |
+| `HubTabWinController` | `WindowController` | Win | Prevents the hub tab from being closed in WinForms TabbedMDI |
+| `NavigationHubWinController` | `ViewController<DashboardView>` | Win | Finds the `NavigationHubControl` in the DashboardView and passes it the `NavigationHubController` |
+
+> **Note:** Blazor doesn't need an equivalent of `NavigationHubWinController` — the Razor component gets its controller via `[CascadingParameter] BlazorControlViewItem ViewItem` → `Application.MainWindow.GetController<NavigationHubController>()`.
 
 ## Database Seeding
 
